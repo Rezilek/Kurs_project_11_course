@@ -19,16 +19,39 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from django.shortcuts import redirect
+from django.http import JsonResponse
 
 
 def redirect_to_api(request):
     return redirect('/api/')
 
+def api_root(request):
+    return JsonResponse({
+        'message': 'API образовательной платформы',
+        'endpoints': {
+            'users': '/api/users/',
+            'payments': '/api/users/payments/',
+            'courses': '/api/courses/',
+        },
+        'filters': {
+            'payments': {
+                'by_course': '/api/users/payments/?paid_course=1',
+                'by_lesson': '/api/users/payments/?paid_lesson=1',
+                'by_method': '/api/users/payments/?payment_method=transfer',
+                'sorted': '/api/users/payments/?ordering=-payment_date',
+            }
+        }
+    })
+
+def home_redirect(request):
+    return redirect('/api/')
+
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/users/', include('users.urls')),
-    path('api/', include('courses.urls')),
-    path('', redirect_to_api),
+    path('api/users/', include(('users.urls', 'users'), namespace='users')),
+    path('api/courses/', include('courses.urls')),
+    path('api/', api_root, name='api-root'),  # ← Добавьте эту строку
+    path('', home_redirect),
 ]
 
 if settings.DEBUG:

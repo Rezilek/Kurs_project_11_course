@@ -12,6 +12,7 @@ media/
 venv/
 env/
 .venv/
+.env
 
 # IDE
 .vscode/
@@ -26,3 +27,5 @@ Thumbs.db
 # Python
 *.py[cod]
 *$py.class
+
+staticfiles/
