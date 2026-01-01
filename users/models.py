@@ -60,6 +60,7 @@ class User(AbstractUser):
 
 
 class Payment(models.Model):
+    objects = None
     PAYMENT_METHOD_CHOICES = [
         ('cash', 'Наличные'),
         ('transfer', 'Перевод на счет'),
