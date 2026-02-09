@@ -1,403 +1,145 @@
-🎓 Образовательная платформа на Django DRF
-Полнофункциональная платформа онлайн-курсов с платежами, подписками и асинхронными уведомлениями
+# Образовательная платформа на Django
 
-https://img.shields.io/badge/Python-3.13+-blue.svg
-https://img.shields.io/badge/Django-5.2+-green.svg
-https://img.shields.io/badge/DRF-3.16+-red.svg
-https://img.shields.io/badge/Celery-5.6+-yellow.svg
-https://img.shields.io/badge/License-MIT-yellow.svg
+Проект для онлайн-обучения с Django REST Framework, Celery, Redis и PostgreSQL.
 
-✨ Особенности
-🔐 Безопасная аутентификация - JWT токены с refresh/access парами
+## Технологии
+- Python 3.11 + Django 4.2
+- Django REST Framework
+- PostgreSQL 15
+- Redis
+- Celery + Celery Beat
+- Gunicorn
+- Docker + Docker Compose
+- JWT аутентификация
+- Stripe API для платежей
+- Swagger/ReDoc документация
 
-💳 Платежная система - полная интеграция Stripe с вебхуками
+## Запуск проекта через Docker Compose
 
-📧 Асинхронные уведомления - Celery + Redis для фоновых задач
+### Требования
+- Docker 20.10+
+- Docker Compose 2.20+
+- Git
 
-📱 Современное API - RESTful с автоматической документацией
+### Шаги для запуска
 
-👥 Гибкие права доступа - роли пользователей, владельцев, модераторов
-
-🔄 Периодические задачи - автоматическая блокировка неактивных пользователей
-
-📊 Подписки на курсы - система уведомлений об обновлениях
-
-📋 Содержание
-Быстрый старт
-
-Архитектура
-
-API Документация
-
-Celery задачи
-
-Stripe интеграция
-
-Развертывание
-
-Тестирование
-
-Контрибьютинг
-
-🚀 Быстрый старт
-Предварительные требования
-Python 3.13+
-
-PostgreSQL 13+
-
-Redis 6+ (для Celery)
-
-Stripe аккаунт (для тестирования платежей)
-
-Установка и запуск
-bash
-# 1. Клонирование репозитория
+1. **Клонируйте репозиторий**
+```bash
 git clone https://github.com/Rezilek/Kurs_project_11_course.git
 cd Kurs_project_11_course
+Создайте файл .env на основе шаблона
 
-# 2. Создание виртуального окружения
-python -m venv venv
-
-# 3. Активация окружения
-# Windows
-venv\Scripts\activate
-# Linux/Mac
-source venv/bin/activate
-
-# 4. Установка зависимостей
-pip install -r requirements.txt
-
-# 5. Настройка окружения
+bash
 cp .env.example .env
-# Отредактируйте .env файл (см. раздел Настройки)
+Отредактируйте .env файл, указав свои значения (секретные ключи, пароли и т.д.)
 
-# 6. Миграции базы данных
-python manage.py migrate
+Запустите проект
 
-# 7. Создание суперпользователя
-python manage.py createsuperuser
-
-# 8. Загрузка тестовых данных (опционально)
-python manage.py loaddata fixtures/test_data.json
-Запуск всех компонентов
 bash
-# В КОНСОЛИ 1: Django сервер
-python manage.py runserver
+docker-compose up -d
+Выполните миграции и создайте суперпользователя
 
-# В КОНСОЛИ 2: Redis (если не запущен)
-redis-server
-
-# В КОНСОЛИ 3: Celery worker
-celery -A config worker --pool=solo -l info
-
-# В КОНСОЛИ 4: Celery beat (периодические задачи)
-celery -A config beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler
-🏗️ Архитектура
-Технологический стек
-Компонент	Технология	Назначение
-Backend	Django 5.2 + DRF 3.16	Основной фреймворк
-База данных	PostgreSQL 13+	Хранение данных
-Асинхронные задачи	Celery 5.6 + Redis	Фоновая обработка
-Платежи	Stripe API	Обработка платежей
-Аутентификация	JWT (Simple JWT)	Безопасный доступ
-Документация API	drf-spectacular	Swagger/ReDoc
-Кэширование	Redis	Сессии и кэш
-CORS	django-cors-headers	Междоменные запросы
-Структура проекта
-text
-Kurs_project_11_course/
-├── config/                      # Конфигурация Django
-│   ├── settings.py             # Основные настройки
-│   ├── urls.py                 # Корневые маршруты
-│   ├── celery.py              # Конфигурация Celery
-│   └── middleware.py          # Кастомные middleware
-├── users/                      # Приложение пользователей
-│   ├── models.py              # Модели User и Payment
-│   ├── views.py               # ViewSets пользователей
-│   ├── serializers.py         # Сериализаторы
-│   ├── tasks.py              # Celery задачи пользователей
-│   └── permissions.py         # Права доступа
-├── courses/                    # Приложение курсов
-│   ├── models.py              # Модели Course, Lesson, Subscription
-│   ├── views.py               # ViewSets курсов
-│   ├── serializers.py         # Сериализаторы
-│   ├── tasks.py              # Celery задачи курсов
-│   └── services/
-│       └── stripe_service.py  # Сервис Stripe
-├── static/                     # Статические файлы
-├── media/                      # Медиафайлы
-└── [другие файлы конфигурации]
-📚 API Документация
-После запуска сервера документация доступна по адресам:
-
-Ресурс	URL	Описание
-Swagger UI	http://localhost:8000/api/docs/	Интерактивная документация
-ReDoc	http://localhost:8000/api/redoc/	Альтернативный просмотр
-OpenAPI Schema	http://localhost:8000/api/schema/	Схема в формате JSON
-API Root	http://localhost:8000/api/	Корневой эндпоинт
-Аутентификация
 bash
-# Получение JWT токена
-curl -X POST http://localhost:8000/api/users/token/ \
-  -H "Content-Type: application/json" \
-  -d '{"email":"test@example.com","password":"password123"}'
+# Выполнить миграции
+docker-compose exec backend python manage.py migrate
 
-# Обновление токена
-curl -X POST http://localhost:8000/api/users/token/refresh/ \
-  -H "Content-Type: application/json" \
-  -d '{"refresh":"ваш_refresh_токен"}'
-Основные эндпоинты
-Пользователи
-POST /api/users/token/ - Получение JWT токена
+# Создать суперпользователя
+docker-compose exec backend python manage.py createsuperuser
 
-POST /api/users/token/refresh/ - Обновление токена
+# Собрать статику (если нужно)
+docker-compose exec backend python manage.py collectstatic --no-input
+Проверка работоспособности сервисов
+Бэкенд (Django): http://localhost:8000
 
-GET /api/users/users/me/ - Профиль текущего пользователя
+API документация (Swagger): http://localhost:8000/api/schema/swagger-ui/
 
-GET /api/users/payments/ - История платежей пользователя
+API документация (ReDoc): http://localhost:8000/api/schema/redoc/
 
-Курсы
-GET /api/courses/courses/ - Список курсов
+Админ-панель: http://localhost:8000/admin/
 
-POST /api/courses/courses/ - Создание курса
+База данных (PostgreSQL): localhost:5432
 
-GET /api/courses/courses/{id}/ - Детали курса
+Redis: localhost:6379
 
-POST /api/courses/courses/{id}/subscribe/ - Подписка на курс
-
-Уроки
-GET /api/courses/lessons/ - Список уроков
-
-POST /api/courses/lessons/ - Создание урока
-
-PATCH /api/courses/lessons/{id}/ - Обновление урока (с уведомлениями)
-
-🔧 Celery задачи
-Асинхронная рассылка писем
-Задача: send_course_update_email
-
-Триггер: Обновление урока через API (если курс не обновлялся >4 часов)
-
-Логика:
-
-python
-# В courses/views.py
-def perform_update(self, serializer):
-    lesson = self.get_object()
-    course = lesson.course
-    time_difference = now - course.updated_at
-    
-    if time_difference > timedelta(hours=4):
-        # Асинхронная отправка уведомлений
-        send_course_update_email.delay(course.id, "Урок обновлен")
-Периодические задачи
-Задача: block_inactive_users
-
-Расписание: 1-е число каждого месяца в 00:00
-
-Логика: Блокирует пользователей, не заходивших более 30 дней
-
-python
-# В users/tasks.py
-@shared_task
-def block_inactive_users():
-    one_month_ago = timezone.now() - timedelta(days=30)
-    inactive_users = User.objects.filter(
-        last_login__lt=one_month_ago,
-        is_active=True
-    )
-    inactive_users.update(is_active=False)
-Настройка периодических задач
+Управление контейнерами
 bash
-# 1. Создайте суперпользователя
-python manage.py createsuperuser
+# Запуск
+docker-compose up -d
 
-# 2. Зайдите в админку
-# http://localhost:8000/admin/
+# Остановка
+docker-compose down
 
-# 3. В разделе "PERIODIC TASKS" создайте задачу:
-# - Name: "Block inactive users monthly"
-# - Task: "users.tasks.block_inactive_users"
-# - Schedule: Crontab (0 0 1 * *)
-# - Enabled: ✓
-💳 Stripe интеграция
-Тестирование платежей
-Тестовые данные карты:
+# Просмотр логов
+docker-compose logs -f
+docker-compose logs -f backend  # логи только бэкенда
 
-Номер: 4242 4242 4242 4242
+# Пересборка контейнеров
+docker-compose up -d --build
 
-Срок: Любая будущая дата
+# Остановка и удаление volumes
+docker-compose down -v
+Сервисы проекта
+Сервис	Порт	Описание
+backend	8000	Django приложение с Gunicorn
+db	5432	PostgreSQL база данных
+redis	6379	Redis для кеша и Celery
+celery_worker	-	Celery воркер для фоновых задач
+celery_beat	-	Celery Beat для периодических задач
+Переменные окружения
+Скопируйте .env.example в .env и настройте:
 
-CVC: Любые 3 цифры
-
-ZIP: Любой 5-значный код
-
-Поток оплаты
-Выбор курса → POST /api/courses/courses/{id}/buy/
-
-Создание сессии Stripe → Возврат checkout URL
-
-Оплата → Пользователь оплачивает на странице Stripe
-
-Вебхук → Автоматическое обновление статуса платежа
-
-Редирект → /success или /cancel
-
-Настройка вебхуков
 bash
-# В Stripe Dashboard → Developers → Webhooks
-Endpoint: http://ваш_домен/api/users/payments/webhook/
-События: checkout.session.completed
-⚙️ Настройки
-Файл .env
-env
 # Django
-DEBUG=True
 SECRET_KEY=your-secret-key-here
+DEBUG=True
 ALLOWED_HOSTS=localhost,127.0.0.1
 
-# База данных
-DB_NAME=kurs_project_db
-DB_USER=postgres
-DB_PASSWORD=your_password
-DB_HOST=localhost
-DB_PORT=5432
+# Database
+POSTGRES_DB=online_education
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=your-password
+POSTGRES_HOST=db
+POSTGRES_PORT=5432
 
-# Stripe
-STRIPE_SECRET_KEY=sk_test_your_key
-STRIPE_PUBLISHABLE_KEY=pk_test_your_key
-STRIPE_WEBHOOK_SECRET=whsec_your_webhook_secret
-
-# Redis для Celery
-REDIS_HOST=localhost
+# Redis
+REDIS_HOST=redis
 REDIS_PORT=6379
-CELERY_BROKER_URL=redis://localhost:6379/0
 
-# Email (для рассылки)
-EMAIL_HOST=smtp.gmail.com
-EMAIL_PORT=587
-EMAIL_USE_TLS=True
-EMAIL_HOST_USER=your_email@gmail.com
-EMAIL_HOST_PASSWORD=your_app_password
-DEFAULT_FROM_EMAIL=your_email@gmail.com
+# Celery
+CELERY_BROKER_URL=redis://redis:6379/0
 
-# CORS
-CORS_ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000
-CSRF_TRUSTED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000
-Тестовые пользователи
-После загрузки фикстур создаются:
-
-Роль	Email	Пароль
-Суперпользователь	admin@example.com	admin123
-Обычный пользователь	user@example.com	user123
-Модератор	moderator@example.com	moderator123
-🧪 Тестирование
-Автоматические тесты
+# Stripe (опционально)
+STRIPE_SECRET_KEY=sk_test_...
+STRIPE_PUBLIC_KEY=pk_test_...
+Доступные команды
 bash
-# Запуск всех тестов
-python test_project.py
+# Запуск тестов
+docker-compose exec backend python manage.py test
 
-# Финальная проверка
-python final_check.py
+# Создание миграций
+docker-compose exec backend python manage.py makemigrations
 
-# Ручное тестирование
-python manual_test.py
-Тестирование Celery
-bash
-# Тестовая задача рассылки
-python manage.py shell
->>> from courses.tasks import send_course_update_email
->>> result = send_course_update_email.delay(1, "Тестовое сообщение")
->>> print(f"Task ID: {result.id}")
+# Запуск shell
+docker-compose exec backend python manage.py shell
 
-# Проверка периодической задачи
->>> from users.tasks import block_inactive_users
->>> block_inactive_users.delay()
-Тестирование с Postman
-Импортируйте коллекцию: docs/postman_collection.json
-
-🚀 Развертывание
-Для продакшена
-bash
-# 1. Установите зависимости
-pip install -r requirements.txt
-
-# 2. Настройте .env
-DEBUG=False
-SECURE_SSL_REDIRECT=True
-# ... другие продакшен настройки
-
-# 3. Соберите статические файлы
-python manage.py collectstatic
-
-# 4. Настройте базу данных
-# Убедитесь что PostgreSQL настроен правильно
-
-# 5. Запустите через Gunicorn
-gunicorn config.wsgi:application --workers 4 --bind 0.0.0.0:8000
-
-# 6. Настройте supervisor/systemd для Celery
-# (см. конфигурационные файлы в docs/deployment/)
-Docker развертывание
-bash
-# Сборка образа
-docker build -t kurs-platform .
-
-# Запуск контейнера
-docker run -p 8000:8000 --env-file .env kurs-platform
-👥 Права доступа
-Роль	Курсы	Уроки	Платежи	Пользователи
-Аноним	👁️ Чтение	👁️ Чтение	❌ Нет	❌ Нет
-Пользователь	✏️ Свои	✏️ Свои	👁️ Свои	✏️ Свой профиль
-Модератор	✏️ Все	✏️ Все	👁️ Все	👁️ Все
-Суперпользователь	✏️ Все	✏️ Все	✏️ Все	✏️ Все
-🤝 Контрибьютинг
-Форкните репозиторий
-
-Создайте ветку для фичи
+# Проверка статуса Celery
+docker-compose exec celery_worker celery -A config status
+Разработка
+Для разработки с горячей перезагрузкой:
 
 bash
-git checkout -b feature/amazing-feature
-Внесите изменения и закоммитьте
-
-bash
-git commit -m 'Add amazing feature'
-Запушьте изменения
-
-bash
-git push origin feature/amazing-feature
-Создайте Pull Request
-
-Стиль кода
-Используйте Black для форматирования
-
-Следуйте PEP 8
-
-Документируйте функции с помощью docstrings
-
-Добавляйте тесты для новой функциональности
-
-📄 Лицензия
-Этот проект лицензирован под MIT License - смотрите файл LICENSE для деталей.
-
-🙏 Благодарности
-Django - веб-фреймворк для перфекционистов
-
-Django REST Framework - мощный инструмент для создания API
-
-Celery - распределенная очередь задач
-
-Stripe - платежная платформа
-
-drf-spectacular - автоматическая документация API
-
-📞 Поддержка
-Если у вас возникли проблемы:
-
-Проверьте Issues
-
-Создайте новое issue с описанием проблемы
-
-Укажите версии Python, Django и шаги для воспроизведения
-
-Happy coding! 🚀
+docker-compose -f docker-compose.yml -f docker-compose.dev.yml up
+Структура проекта
+text
+├── docker-compose.yml
+├── .env.example
+├── .gitignore
+├── README.md
+├── backend/              # Django проект
+│   ├── Dockerfile
+│   ├── manage.py
+│   └── config/
+├── nginx/               # Конфигурация nginx (если есть)
+└── celery/              # Конфигурация Celery
+Лицензия
+MIT
