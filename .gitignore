@@ -93,3 +93,5 @@ htmlcov/
 *_test.ps1
 *_fixed.py
 *.html
+*.zip
+backup_*

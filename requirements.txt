@@ -1,33 +1,16 @@
-﻿# Django
-Django==5.2.10
-
-# REST Framework
+﻿Django==5.2.10
 djangorestframework==3.16.1
 djangorestframework-simplejwt==5.3.1
-
-# Database
 psycopg2-binary==2.9.11
-
-# Images
-Pillow==10.4.0
-
-# Configuration
+Pillow==12.1.0  # ← УСПЕШНО УСТАНОВЛЕННАЯ ВЕРСИЯ
 python-decouple==3.8
 python-dotenv==1.0.1
-
-# Celery
 celery==5.6.2
 redis==5.2.1
 django-celery-beat==2.8.1
-
-# API
 django-cors-headers==4.9.0
 drf-spectacular==0.29.0
 django-filter==25.2
-
-# Payments
-stripe==10.7.0
-
-# Utilities
+stripe==14.1.0
 django-extensions==4.1
 django-timezone-field==7.2.1
